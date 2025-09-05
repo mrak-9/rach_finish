@@ -22,3 +22,11 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Database files (SQLite - not used with MariaDB)
+/database/database.sqlite
+/database/database.sqlite-journal
+
+# MariaDB dumps
+*.sql
+/backups/

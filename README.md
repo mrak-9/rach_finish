@@ -1,61 +1,218 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Сайт Русской ассоциации чтения (РАЧ)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Современная веб-платформа для Русской ассоциации чтения, созданная на Laravel с использованием современных технологий.
 
-## About Laravel
+## 🚀 Технологии
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **PHP 8.2** - серверная часть
+- **Laravel Framework** - основной фреймворк
+- **Laravel Breeze** - система аутентификации
+- **Filament v4** - административная панель
+- **TailwindCSS** - стилизация
+- **MariaDB/MySQL** - база данных
+- **Vite** - сборка фронтенда
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Функциональность
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Публичная часть
+- ✅ Главная страница с слайдерами новостей и мероприятий
+- ✅ Информационные разделы (О нас, СМИ о нас, Международное сотрудничество)
+- ✅ Отделения РАЧ с группировкой по регионам
+- ✅ Система новостей с пагинацией
+- ✅ Мероприятия с файловой системой и галереей
+- ✅ Конференции и семинары с регистрацией
+- ✅ Публикации с контролем доступа
+- ✅ Проекты и партнеры
+- ✅ Система членства с оплатой
 
-## Learning Laravel
+### Система пользователей
+- ✅ Регистрация/авторизация с email верификацией
+- ✅ 4 уровня доступа: guest, user, verified_user, admin
+- ✅ Личный кабинет с 4 разделами:
+  - Профиль пользователя
+  - Мои мероприятия
+  - Мои сертификаты
+  - Членский взнос
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Административная панель
+- ✅ Filament с русской локализацией
+- ✅ Управление всем контентом
+- ✅ Модерация пользователей и участников
+- ✅ Экспорт данных в Excel
+- ✅ Управление статическими страницами
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 🛠 Установка
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Требования
+- PHP 8.2+
+- Composer
+- Node.js & npm
+- MariaDB 10.4+ или MySQL 8.0+
 
-## Laravel Sponsors
+### Шаги установки
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+1. **Клонирование репозитория**
+```bash
+git clone https://github.com/mrak-9/rach_finish.git
+cd rach_finish
+```
 
-### Premium Partners
+2. **Установка зависимостей**
+```bash
+composer install
+npm install
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+3. **Настройка окружения**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## Contributing
+4. **Настройка базы данных MariaDB**
+```bash
+# Создайте базу данных в MariaDB
+mysql -u root -p
+CREATE DATABASE rach_website CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+exit
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Настройте .env файл
+DB_CONNECTION=mariadb
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=rach_website
+DB_USERNAME=root
+DB_PASSWORD=your_password
+```
 
-## Code of Conduct
+5. **Миграции и сборка**
+```bash
+php artisan migrate
+npm run build
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+6. **Создание администратора**
+```bash
+php artisan make:filament-user
+```
 
-## Security Vulnerabilities
+7. **Запуск сервера**
+```bash
+php artisan serve --port=12000
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🌐 Доступ
 
-## License
+- **Сайт:** http://localhost:12000
+- **Админ панель:** http://localhost:12000/admin
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 📁 Структура проекта
+
+```
+rach-website/
+├── app/
+│   ├── Filament/Resources/     # Ресурсы админ панели
+│   ├── Http/Controllers/       # Контроллеры
+│   └── Models/                 # Модели данных
+├── database/
+│   └── migrations/             # Миграции БД
+├── resources/
+│   ├── views/                  # Blade шаблоны
+│   └── js/                     # JavaScript файлы
+├── routes/
+│   └── web.php                 # Маршруты
+└── storage/
+    └── app/events/             # Файлы мероприятий
+```
+
+## 🎨 Дизайн
+
+Сайт использует современный дизайн с темно-синей цветовой схемой, полностью адаптивный для всех устройств.
+
+## 🔐 Безопасность
+
+- CSRF защита на всех формах
+- Валидация данных на сервере и клиенте
+- Контроль доступа к файлам и функциям
+- Email верификация обязательна
+- Хеширование паролей с bcrypt
+
+## 📝 Лицензия
+
+Проект создан для Русской ассоциации чтения (РАЧ).
+
+## 👥 Разработка
+
+Проект разработан с использованием современных практик Laravel разработки и готов к продакшену.
+
+### Основные команды для разработки
+
+```bash
+# Запуск в режиме разработки
+php artisan serve --port=12000
+
+# Сборка фронтенда для разработки
+npm run dev
+
+# Сборка для продакшена
+npm run build
+
+# Очистка кеша
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+```
+
+## 🚀 Развертывание
+
+Для развертывания в продакшене:
+
+1. Настройте веб-сервер (Apache/Nginx)
+2. Настройте MariaDB базу данных
+3. Настройте email сервер для уведомлений
+4. Установите SSL сертификат
+5. Настройте файловое хранилище
+6. Запустите миграции: `php artisan migrate --force`
+7. Соберите фронтенд: `npm run build`
+
+## 🗄️ База данных MariaDB
+
+Проект оптимизирован для работы с MariaDB и включает:
+
+- Полную схему базы данных (15 таблиц)
+- Индексы для оптимизации производительности
+- Поддержку UTF-8 для корректной работы с русским языком
+- Миграции для автоматического создания структуры
+
+### Основные таблицы:
+- `users` - пользователи с ролями и профилями
+- `news` - новости
+- `conferences` - конференции и семинары
+- `publications` - публикации
+- `projects` - проекты
+- `partners` - партнеры
+- `branches` - отделения РАЧ
+- `memberships` - членство
+- `static_pages` - статические страницы
+
+## 🔧 Настройка MariaDB
+
+### Рекомендуемые настройки MariaDB для оптимальной производительности:
+
+```sql
+-- Создание базы данных с правильной кодировкой
+CREATE DATABASE rach_website 
+CHARACTER SET utf8mb4 
+COLLATE utf8mb4_unicode_ci;
+
+-- Создание пользователя (опционально)
+CREATE USER 'rach_user'@'localhost' IDENTIFIED BY 'secure_password';
+GRANT ALL PRIVILEGES ON rach_website.* TO 'rach_user'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+### Минимальные требования MariaDB:
+- MariaDB 10.4+ или MySQL 8.0+
+- Поддержка InnoDB
+- UTF-8 (utf8mb4) кодировка
+- Минимум 512MB RAM для базы данных
