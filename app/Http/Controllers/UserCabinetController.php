@@ -89,7 +89,7 @@ class UserCabinetController extends Controller
             ->with('conference')
             ->where('is_approved', true)
             ->whereHas('conference', function($query) {
-                $query->where('conference_date', '<', now());
+                $query->where('conference_end_date', '<', now());
             })
             ->orderBy('created_at', 'desc')
             ->get();

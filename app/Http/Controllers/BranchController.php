@@ -19,8 +19,8 @@ class BranchController extends Controller
 
     public function show(Branch $branch)
     {
-        // Загружаем связанные проекты и мероприятия
-        $branch->load(['projects', 'events']);
+        // Загружаем связанные проекты
+        $branch->load(['projects']);
         
         return view('branches.show', compact('branch'));
     }

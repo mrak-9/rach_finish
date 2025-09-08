@@ -21,7 +21,7 @@ class ConferenceController extends Controller
             ->orderBy('conference_start_date', 'desc')
             ->get()
             ->groupBy(function($conference) {
-                return $conference->conference_date->format('Y');
+                return $conference->conference_start_date->format('Y');
             });
 
         return view('conferences.index', compact('currentConference', 'pastConferences'));

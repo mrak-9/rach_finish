@@ -28,7 +28,7 @@
                             Текущее мероприятие
                         </div>
                         <h2 class="text-3xl font-bold text-gray-900 mb-4">{{ $currentConference->title }}</h2>
-                        <p class="text-lg text-gray-600 mb-6">{{ $currentConference->conference_date->format('d.m.Y') }}</p>
+                        <p class="text-lg text-gray-600 mb-6">{{ $currentConference->conference_start_date->format('d.m.Y') }}</p>
                     </div>
 
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -141,7 +141,7 @@
                                                 <div class="flex-1">
                                                     <div class="flex items-center mb-2">
                                                         <time class="text-sm text-blue-600 font-medium">
-                                                            {{ $conference->conference_date->format('d.m.Y') }}
+                                                            {{ $conference->conference_start_date->format('d.m.Y') }}
                                                         </time>
                                                         <span class="mx-2 text-gray-300">•</span>
                                                         <span class="text-sm text-gray-600">{{ $conference->format }}</span>

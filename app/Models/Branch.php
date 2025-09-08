@@ -43,10 +43,11 @@ class Branch extends Model
         return $this->belongsToMany(Project::class);
     }
 
-    public function events(): BelongsToMany
-    {
-        return $this->belongsToMany(Event::class, 'branch_event', 'branch_id', 'event_name', 'id', 'name');
-    }
+    // Events are managed through file system, not database
+    // public function events(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Event::class, 'branch_event', 'branch_id', 'event_name', 'id', 'name');
+    // }
 
     public function scopePublished($query)
     {
