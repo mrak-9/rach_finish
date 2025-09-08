@@ -24,4 +24,34 @@ class BranchController extends Controller
         
         return view('branches.show', compact('branch'));
     }
+
+    /**
+     * API: Получить список отделений
+     */
+    public function apiIndex(Request $request)
+    {
+        $perPage = min($request->get('per_page', 10), 50);
+        
+        $branches = Branch::orderBy('region')
+            ->orderBy('name')
+            ->paginate($perPage);
+
+        return response()->json([
+            'data' => $branches->items(),
+            'current_page' => $branches->currentPage(),
+            'per_page' => $branches->perPage(),
+            'total' => $branches->total(),
+            'last_page' => $branches->lastPage(),
+            'has_more_pages' => $branches->hasMorePages(),
+        ]);
+    }
+
+    /**
+     * API: Получить конкретное отделение
+     */
+    public function apiShow(Branch $branch)
+    {
+        $branch->load(['projects']);
+        return response()->json(['data' => $branch]);
+    }
 }

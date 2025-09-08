@@ -45,4 +45,32 @@ class PublicationController extends Controller
 
         return Storage::download($filePath);
     }
+
+    /**
+     * API: Получить список публикаций
+     */
+    public function apiIndex(Request $request)
+    {
+        $perPage = min($request->get('per_page', 10), 50);
+        
+        $publications = Publication::orderBy('published_at', 'desc')
+            ->paginate($perPage);
+
+        return response()->json([
+            'data' => $publications->items(),
+            'current_page' => $publications->currentPage(),
+            'per_page' => $publications->perPage(),
+            'total' => $publications->total(),
+            'last_page' => $publications->lastPage(),
+            'has_more_pages' => $publications->hasMorePages(),
+        ]);
+    }
+
+    /**
+     * API: Получить конкретную публикацию
+     */
+    public function apiShow(Publication $publication)
+    {
+        return response()->json(['data' => $publication]);
+    }
 }

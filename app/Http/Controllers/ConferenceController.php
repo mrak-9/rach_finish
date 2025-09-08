@@ -112,4 +112,33 @@ class ConferenceController extends Controller
 
         return redirect()->back()->with('success', 'Вы успешно зарегистрированы на конференцию!');
     }
+
+    /**
+     * API: Получить список конференций
+     */
+    public function apiIndex(Request $request)
+    {
+        $perPage = min($request->get('per_page', 10), 50);
+        
+        $conferences = Conference::orderBy('conference_start_date', 'desc')
+            ->paginate($perPage);
+
+        return response()->json([
+            'data' => $conferences->items(),
+            'current_page' => $conferences->currentPage(),
+            'per_page' => $conferences->perPage(),
+            'total' => $conferences->total(),
+            'last_page' => $conferences->lastPage(),
+            'has_more_pages' => $conferences->hasMorePages(),
+        ]);
+    }
+
+    /**
+     * API: Получить конкретную конференцию
+     */
+    public function apiShow(Conference $conference)
+    {
+        $conference->load(['participants', 'theses']);
+        return response()->json(['data' => $conference]);
+    }
 }

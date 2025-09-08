@@ -63,8 +63,8 @@ class DDoSProtection
         
         foreach ($suspiciousUserAgents as $suspicious) {
             if (stripos($userAgent, $suspicious) !== false) {
-                // Разрешаем некоторые легитимные боты
-                $allowedBots = ['googlebot', 'bingbot', 'yandexbot', 'facebookexternalhit'];
+                // Разрешаем некоторые легитимные боты и инструменты для тестирования
+                $allowedBots = ['googlebot', 'bingbot', 'yandexbot', 'facebookexternalhit', 'curl'];
                 $isAllowedBot = false;
                 
                 foreach ($allowedBots as $allowedBot) {
