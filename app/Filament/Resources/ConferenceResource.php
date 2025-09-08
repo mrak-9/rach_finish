@@ -5,6 +5,9 @@ namespace App\Filament\Resources;
 use App\Models\Conference;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Actions;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -13,10 +16,6 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
-
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Actions;
 
 class ConferenceResource extends Resource
 {
@@ -69,31 +68,6 @@ class ConferenceResource extends Resource
                 RichEditor::make('post_release')
                     ->label('Пост-релиз')
                     ->columnSpanFull(),
-                Repeater::make('important_dates')
-                    ->label('Важные даты')
-                    ->schema([
-                        DateTimePicker::make('date')
-                            ->label('Дата')
-                            ->required(),
-                        TextInput::make('event')
-                            ->label('Событие')
-                            ->required(),
-                    ])
-                    ->columnSpanFull(),
-                Repeater::make('events')
-                    ->label('Мероприятия')
-                    ->schema([
-                        TextInput::make('name')
-                            ->label('Название')
-                            ->required(),
-                        Textarea::make('description')
-                            ->label('Описание'),
-                        DateTimePicker::make('start_time')
-                            ->label('Время начала'),
-                        DateTimePicker::make('end_time')
-                            ->label('Время окончания'),
-                    ])
-                    ->columnSpanFull(),
                 Toggle::make('is_published')
                     ->label('Опубликовано')
                     ->default(true),
@@ -107,63 +81,38 @@ class ConferenceResource extends Resource
                 Tables\Columns\TextColumn::make('title')
                     ->label('Название')
                     ->searchable()
-                    ->sortable()
-                    ->limit(50),
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('location')
+                    ->label('Место проведения')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('registration_start_date')
                     ->label('Регистрация с')
-                    ->date()
+                    ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('conference_start_date')
                     ->label('Дата начала')
-                    ->date()
+                    ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('conference_end_date')
                     ->label('Дата окончания')
-                    ->date()
+                    ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('location')
-                    ->label('Место')
-                    ->limit(30),
-                Tables\Columns\TextColumn::make('conference_type')
-                    ->label('Тип')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'online' => 'success',
-                        'offline' => 'warning',
-                        'hybrid' => 'info',
-                        default => 'gray',
-                    }),
                 Tables\Columns\IconColumn::make('is_published')
                     ->label('Опубликовано')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Создано')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Обновлено')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_published')
                     ->label('Опубликовано'),
-                Tables\Filters\SelectFilter::make('conference_type')
-                    ->label('Тип конференции')
-                    ->options([
-                        'online' => 'Онлайн',
-                        'offline' => 'Очно',
-                        'hybrid' => 'Гибридная',
-                    ]),
                 Tables\Filters\Filter::make('upcoming')
                     ->label('Предстоящие')
                     ->query(fn ($query) => $query->where('conference_start_date', '>=', now())),
+                Tables\Filters\Filter::make('past')
+                    ->label('Прошедшие')
+                    ->query(fn ($query) => $query->where('conference_end_date', '<', now())),
             ])
             ->actions([
                 Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Actions\BulkActionGroup::make([
@@ -171,6 +120,13 @@ class ConferenceResource extends Resource
                 ]),
             ])
             ->defaultSort('conference_start_date', 'desc');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
     }
 
     public static function getPages(): array
