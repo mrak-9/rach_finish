@@ -1,5 +1,5 @@
 <x-public-layout>
-    <x-slot name="title">{{ $event['name'] }} - Мероприятия - Русская ассоциация чтения</x-slot>
+    <x-slot name="title">{{ $event->name }} - Мероприятия - Русская ассоциация чтения</x-slot>
 
     <div class="bg-white">
         <!-- Breadcrumbs -->
@@ -33,7 +33,7 @@
                                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                                 </svg>
                                 <span class="ml-4 text-sm font-medium text-gray-500">
-                                    {{ Str::limit($event['name'], 30) }}
+                                    {{ Str::limit($event->name, 30) }}
                                 </span>
                             </div>
                         </li>
@@ -47,21 +47,21 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
                     <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                        {{ $event['name'] }}
+                        {{ $event->name }}
                     </h1>
                     <div class="flex items-center justify-center space-x-4 text-gray-600">
                         <div class="flex items-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
-                            <span>{{ count($event['images']) }} фотографий</span>
+                            <span>{{ count($event->images) }} фотографий</span>
                         </div>
-                        @if(count($event['branches']) > 0)
+                        @if(isset($relatedBranches) && $relatedBranches->count() > 0)
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                 </svg>
-                                <span>{{ count($event['branches']) }} отделений участвовало</span>
+                                <span>{{ $relatedBranches->count() }} отделений участвовало</span>
                             </div>
                         @endif
                     </div>
@@ -76,25 +76,23 @@
                     <!-- Main Content -->
                     <div class="lg:col-span-2">
                         <!-- Description -->
-                        @if($event['description'])
-                            <div class="mb-12">
-                                <h2 class="text-2xl font-bold text-gray-900 mb-6">О мероприятии</h2>
-                                <div class="prose prose-lg max-w-none">
-                                    {!! nl2br(e($event['description'])) !!}
-                                </div>
+                        <div class="mb-12">
+                            <h2 class="text-2xl font-bold text-gray-900 mb-6">О мероприятии</h2>
+                            <div class="prose prose-lg max-w-none">
+                                {!! nl2br(e($event->description)) !!}
                             </div>
-                        @endif
+                        </div>
 
                         <!-- Photo Gallery -->
-                        @if(count($event['images']) > 0)
+                        @if($event->hasImages())
                             <div class="mb-12">
                                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Фотогалерея</h2>
                                 
                                 <!-- Image Grid -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="photo-gallery">
-                                    @foreach($event['images'] as $index => $image)
+                                    @foreach($event->images as $index => $image)
                                         <div class="relative group cursor-pointer" onclick="openLightbox({{ $index }})">
-                                            <img src="{{ asset($image['path']) }}" 
+                                            <img src="{{ $image['url'] }}" 
                                                  alt="{{ $image['caption'] }}" 
                                                  class="w-full h-48 object-cover rounded-lg shadow-sm group-hover:shadow-lg transition-shadow">
                                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity rounded-lg flex items-center justify-center">

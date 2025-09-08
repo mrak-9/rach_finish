@@ -2,119 +2,284 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
+use App\Models\Branch;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
-    private $eventsPath = 'events';
-
-    public function index()
+    /**
+     * Отображение списка мероприятий
+     */
+    public function index(Request $request)
     {
-        $events = $this->getEventsFromFileSystem();
+        $pagination = Event::paginate(10);
         
-        // Пагинация вручную
-        $perPage = 10;
-        $currentPage = request()->get('page', 1);
-        $total = count($events);
-        $events = array_slice($events, ($currentPage - 1) * $perPage, $perPage);
-        
-        return view('events.index', compact('events', 'total', 'currentPage', 'perPage'));
+        return view('events.index', [
+            'events' => $pagination['data'],
+            'pagination' => $pagination
+        ]);
     }
 
-    public function show($eventSlug)
+    /**
+     * Отображение конкретного мероприятия
+     */
+    public function show(string $slug)
     {
-        $eventPath = storage_path('app/public/' . $this->eventsPath . '/' . $eventSlug);
+        $event = Event::findBySlug($slug);
         
-        if (!File::exists($eventPath)) {
+        if (!$event) {
             abort(404, 'Мероприятие не найдено');
         }
 
-        $event = $this->getEventDetails($eventSlug);
+        // Получаем связанные отделения (можно настроить логику)
+        $relatedBranches = Branch::limit(3)->get();
         
-        return view('events.show', compact('event'));
+        return view('events.show', compact('event', 'relatedBranches'));
     }
 
-    private function getEventsFromFileSystem()
+    /**
+     * Административные методы для управления мероприятиями
+     */
+    
+    /**
+     * Создание нового мероприятия (для админ панели)
+     */
+    public function store(Request $request)
     {
-        $eventsPath = storage_path('app/public/' . $this->eventsPath);
-        
-        if (!File::exists($eventsPath)) {
-            File::makeDirectory($eventsPath, 0755, true);
-            return [];
-        }
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+        ]);
 
-        $events = [];
-        $directories = File::directories($eventsPath);
+        $event = Event::create($request->name);
+        $event->updateDescription($request->description);
 
-        foreach ($directories as $directory) {
-            $eventName = basename($directory);
-            $event = $this->getEventDetails($eventName);
-            if ($event) {
-                $events[] = $event;
+        // Загружаем изображения если есть
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $caption = $request->input("image_captions.{$index}");
+                $event->addImage($image, $caption);
             }
         }
 
-        // Сортируем по имени (можно изменить логику сортировки)
-        usort($events, function($a, $b) {
-            return strcmp($a['name'], $b['name']);
-        });
-
-        return $events;
+        return redirect()->route('admin.events.index')
+                        ->with('success', 'Мероприятие успешно создано');
     }
 
-    private function getEventDetails($eventSlug)
+    /**
+     * Обновление мероприятия
+     */
+    public function update(Request $request, string $slug)
     {
-        $eventPath = storage_path('app/public/' . $this->eventsPath . '/' . $eventSlug);
+        $event = Event::findBySlug($slug);
         
-        if (!File::exists($eventPath)) {
-            return null;
+        if (!$event) {
+            abort(404, 'Мероприятие не найдено');
         }
 
-        $event = [
-            'slug' => $eventSlug,
-            'name' => str_replace(['_', '-'], ' ', $eventSlug),
-            'description' => '',
-            'images' => [],
-            'branches' => []
-        ];
+        $request->validate([
+            'description' => 'required|string',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+        ]);
 
-        // Читаем описание из текстового файла
-        $descriptionFile = $eventPath . '/description.txt';
-        if (File::exists($descriptionFile)) {
-            $event['description'] = File::get($descriptionFile);
-        }
+        $event->updateDescription($request->description);
 
-        // Получаем изображения
-        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-        $files = File::files($eventPath);
-        
-        foreach ($files as $file) {
-            $extension = strtolower($file->getExtension());
-            if (in_array($extension, $imageExtensions)) {
-                $fileName = $file->getFilename();
-                $imageName = pathinfo($fileName, PATHINFO_FILENAME);
-                
-                $event['images'][] = [
-                    'filename' => $fileName,
-                    'path' => 'storage/' . $this->eventsPath . '/' . $eventSlug . '/' . $fileName,
-                    'caption' => str_replace(['_', '-'], ' ', $imageName)
-                ];
+        // Добавляем новые изображения если есть
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $caption = $request->input("image_captions.{$index}");
+                $event->addImage($image, $caption);
             }
         }
 
-        // Получаем связанные отделения (пример логики)
-        // В реальности это может быть более сложная логика
-        $event['branches'] = $this->getRelatedBranches($eventSlug);
-
-        return $event;
+        return redirect()->route('admin.events.show', $slug)
+                        ->with('success', 'Мероприятие успешно обновлено');
     }
 
-    private function getRelatedBranches($eventSlug)
+    /**
+     * Удаление мероприятия
+     */
+    public function destroy(string $slug)
     {
-        // Простая логика связи отделений с мероприятиями
-        // В реальности это может быть настроено через админ панель
-        return \App\Models\Branch::limit(3)->get();
+        $event = Event::findBySlug($slug);
+        
+        if (!$event) {
+            abort(404, 'Мероприятие не найдено');
+        }
+
+        $event->delete();
+
+        return redirect()->route('admin.events.index')
+                        ->with('success', 'Мероприятие успешно удалено');
+    }
+
+    /**
+     * Удаление изображения из мероприятия
+     */
+    public function removeImage(Request $request, string $slug)
+    {
+        $event = Event::findBySlug($slug);
+        
+        if (!$event) {
+            abort(404, 'Мероприятие не найдено');
+        }
+
+        $imagePath = $request->input('image_path');
+        $event->removeImage($imagePath);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * API методы для получения данных
+     */
+    
+    /**
+     * API для получения списка мероприятий
+     */
+    public function apiIndex(Request $request)
+    {
+        $perPage = $request->get('per_page', 10);
+        $pagination = Event::paginate($perPage);
+        
+        return response()->json($pagination);
+    }
+
+    /**
+     * API для получения конкретного мероприятия
+     */
+    public function apiShow(string $slug)
+    {
+        $event = Event::findBySlug($slug);
+        
+        if (!$event) {
+            return response()->json(['error' => 'Мероприятие не найдено'], 404);
+        }
+
+        return response()->json([
+            'name' => $event->name,
+            'slug' => $event->slug,
+            'description' => $event->description,
+            'short_description' => $event->getShortDescription(),
+            'images' => $event->images,
+            'preview_image' => $event->getPreviewImage(),
+            'slider_images' => $event->getSliderImages(),
+            'has_images' => $event->hasImages(),
+            'url' => $event->getUrl()
+        ]);
+    }
+
+    /**
+     * API для создания мероприятия (только для авторизованных)
+     */
+    public function apiStore(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+        ]);
+
+        try {
+            $event = Event::create($request->name);
+            $event->updateDescription($request->description);
+
+            return response()->json([
+                'message' => 'Мероприятие успешно создано',
+                'event' => [
+                    'name' => $event->name,
+                    'slug' => $event->slug,
+                    'url' => $event->getUrl()
+                ]
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Ошибка при создании мероприятия',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API для обновления мероприятия (только для авторизованных)
+     */
+    public function apiUpdate(Request $request, string $slug)
+    {
+        $event = Event::findBySlug($slug);
+        
+        if (!$event) {
+            return response()->json(['error' => 'Мероприятие не найдено'], 404);
+        }
+
+        $request->validate([
+            'description' => 'required|string',
+        ]);
+
+        try {
+            $event->updateDescription($request->description);
+
+            return response()->json([
+                'message' => 'Мероприятие успешно обновлено',
+                'event' => [
+                    'name' => $event->name,
+                    'slug' => $event->slug,
+                    'description' => $event->description
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Ошибка при обновлении мероприятия',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API для удаления мероприятия (только для авторизованных)
+     */
+    public function apiDestroy(string $slug)
+    {
+        $event = Event::findBySlug($slug);
+        
+        if (!$event) {
+            return response()->json(['error' => 'Мероприятие не найдено'], 404);
+        }
+
+        try {
+            $event->delete();
+
+            return response()->json([
+                'message' => 'Мероприятие успешно удалено'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Ошибка при удалении мероприятия',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Административные API методы (только для администраторов)
+     */
+    
+    public function apiAdminStore(Request $request)
+    {
+        // Дополнительная логика для администраторов
+        return $this->apiStore($request);
+    }
+
+    public function apiAdminUpdate(Request $request, string $slug)
+    {
+        // Дополнительная логика для администраторов
+        return $this->apiUpdate($request, $slug);
+    }
+
+    public function apiAdminDestroy(string $slug)
+    {
+        // Дополнительная логика для администраторов
+        return $this->apiDestroy($slug);
     }
 }

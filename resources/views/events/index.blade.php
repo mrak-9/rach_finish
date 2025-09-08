@@ -19,7 +19,7 @@
         <!-- Events List -->
         <section class="py-16">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                @if(count($events) > 0)
+                @if($events->count() > 0)
                     <div class="space-y-8">
                         @foreach($events as $event)
                             <article class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
@@ -27,27 +27,28 @@
                                     <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
                                         <!-- Event Images Slider -->
                                         <div class="flex-shrink-0 mb-6 lg:mb-0 lg:mr-8">
-                                            @if(count($event['images']) > 0)
+                                            @if($event->hasImages())
                                                 <div class="w-full lg:w-80">
-                                                    @if(count($event['images']) == 1)
-                                                        <img src="{{ asset($event['images'][0]['path']) }}" 
-                                                             alt="{{ $event['images'][0]['caption'] }}" 
+                                                    @php $sliderImages = $event->getSliderImages(); @endphp
+                                                    @if(count($sliderImages) == 1)
+                                                        <img src="{{ $sliderImages[0]['url'] }}" 
+                                                             alt="{{ $sliderImages[0]['caption'] }}" 
                                                              class="w-full h-48 object-cover rounded-lg">
                                                     @else
                                                         <!-- Simple image slider -->
                                                         <div class="relative">
                                                             <div class="overflow-hidden rounded-lg">
                                                                 <div class="flex transition-transform duration-300" id="slider-{{ $loop->index }}">
-                                                                    @foreach($event['images'] as $image)
-                                                                        <img src="{{ asset($image['path']) }}" 
+                                                                    @foreach($sliderImages as $image)
+                                                                        <img src="{{ $image['url'] }}" 
                                                                              alt="{{ $image['caption'] }}" 
                                                                              class="w-full h-48 object-cover flex-shrink-0">
                                                                     @endforeach
                                                                 </div>
                                                             </div>
-                                                            @if(count($event['images']) > 1)
+                                                            @if(count($sliderImages) > 1)
                                                                 <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                                                                    @foreach($event['images'] as $index => $image)
+                                                                    @foreach($sliderImages as $index => $image)
                                                                         <div class="w-2 h-2 bg-white bg-opacity-50 rounded-full {{ $index === 0 ? 'bg-opacity-100' : '' }}"></div>
                                                                     @endforeach
                                                                 </div>
@@ -73,17 +74,15 @@
                                         <!-- Event Content -->
                                         <div class="flex-1">
                                             <h3 class="text-2xl font-semibold text-gray-900 mb-3">
-                                                {{ $event['name'] }}
+                                                {{ $event->name }}
                                             </h3>
                                             
-                                            @if($event['description'])
-                                                <p class="text-gray-600 mb-4 text-lg">
-                                                    {{ Str::limit($event['description'], 200) }}
-                                                </p>
-                                            @endif
+                                            <p class="text-gray-600 mb-4 text-lg">
+                                                {{ $event->getShortDescription() }}
+                                            </p>
 
                                             <div class="flex items-center justify-between">
-                                                <a href="{{ route('events.show', $event['slug']) }}" 
+                                                <a href="{{ $event->getUrl() }}" 
                                                    class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center">
                                                     Смотреть фотоотчет
                                                     <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,11 +90,13 @@
                                                     </svg>
                                                 </a>
 
-                                                @if(count($event['branches']) > 0)
-                                                    <div class="text-sm text-gray-500">
-                                                        Участвовали: {{ count($event['branches']) }} отделений
-                                                    </div>
-                                                @endif
+                                                <div class="text-sm text-gray-500">
+                                                    @if($event->hasImages())
+                                                        {{ count($event->images) }} фотографий
+                                                    @else
+                                                        Фотографии будут добавлены
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -105,29 +106,29 @@
                     </div>
 
                     <!-- Simple Pagination -->
-                    @if($total > $perPage)
+                    @if($pagination['total'] > $pagination['per_page'])
                         <div class="mt-12 flex justify-center">
                             <nav class="flex items-center space-x-2">
-                                @if($currentPage > 1)
-                                    <a href="?page={{ $currentPage - 1 }}" 
+                                @if($pagination['current_page'] > 1)
+                                    <a href="?page={{ $pagination['current_page'] - 1 }}" 
                                        class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                                         Предыдущая
                                     </a>
                                 @endif
                                 
                                 @php
-                                    $totalPages = ceil($total / $perPage);
+                                    $totalPages = $pagination['last_page'];
                                 @endphp
                                 
                                 @for($i = 1; $i <= $totalPages; $i++)
                                     <a href="?page={{ $i }}" 
-                                       class="px-3 py-2 text-sm font-medium {{ $i == $currentPage ? 'text-blue-600 bg-blue-50 border-blue-500' : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-50' }} border rounded-md">
+                                       class="px-3 py-2 text-sm font-medium {{ $i == $pagination['current_page'] ? 'text-blue-600 bg-blue-50 border-blue-500' : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-50' }} border rounded-md">
                                         {{ $i }}
                                     </a>
                                 @endfor
                                 
-                                @if($currentPage < $totalPages)
-                                    <a href="?page={{ $currentPage + 1 }}" 
+                                @if($pagination['has_more_pages'])
+                                    <a href="?page={{ $pagination['current_page'] + 1 }}" 
                                        class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                                         Следующая
                                     </a>
