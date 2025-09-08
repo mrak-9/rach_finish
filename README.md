@@ -48,6 +48,43 @@
 - Composer
 - Node.js & npm
 - MariaDB 10.4+ или MySQL 8.0+
+- Docker & Docker Compose (для контейнеризации)
+
+### 🐳 Быстрый запуск с Docker
+
+1. **Клонирование репозитория:**
+```bash
+git clone git@github.com:mrak-9/rach_finish.git
+cd rach_finish
+```
+
+2. **Запуск для разработки:**
+```bash
+# Сборка и запуск контейнеров
+docker-compose up -d
+
+# Выполнение миграций
+docker-compose exec app php artisan migrate --seed
+
+# Генерация ключа приложения
+docker-compose exec app php artisan key:generate
+```
+
+3. **Запуск для продакшена:**
+```bash
+# Запуск с продакшен конфигурацией
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Выполнение миграций
+docker-compose exec app php artisan migrate --seed
+```
+
+**Доступные сервисы:**
+- Приложение: http://localhost:52099
+- phpMyAdmin: http://localhost:8080
+- MariaDB: localhost:3306
+
+### 📦 Ручная установка
 
 ### Шаги установки
 
@@ -216,3 +253,61 @@ FLUSH PRIVILEGES;
 - Поддержка InnoDB
 - UTF-8 (utf8mb4) кодировка
 - Минимум 512MB RAM для базы данных
+
+## 🐳 Docker команды
+
+### Основные команды для работы с Docker:
+
+```bash
+# Сборка контейнеров
+docker-compose build
+
+# Запуск в фоновом режиме
+docker-compose up -d
+
+# Просмотр логов
+docker-compose logs -f app
+
+# Остановка контейнеров
+docker-compose down
+
+# Полная очистка (с удалением volumes)
+docker-compose down -v
+
+# Выполнение команд внутри контейнера
+docker-compose exec app php artisan migrate
+docker-compose exec app php artisan cache:clear
+
+# Доступ к bash контейнера
+docker-compose exec app sh
+
+# Мониторинг ресурсов
+docker-compose top
+```
+
+### Полезные Docker команды для разработки:
+
+```bash
+# Пересборка только app контейнера
+docker-compose build app
+
+# Перезапуск только app сервиса
+docker-compose restart app
+
+# Просмотр статуса контейнеров
+docker-compose ps
+
+# Просмотр использования ресурсов
+docker stats
+
+# Очистка неиспользуемых образов
+docker image prune -a
+```
+
+### Переменные окружения для Docker:
+
+Основные переменные настраиваются в `docker-compose.yml`:
+- `DB_DATABASE=rach_db` - название базы данных
+- `DB_USERNAME=rach_user` - пользователь БД
+- `DB_PASSWORD=rach_password123` - пароль БД
+- `APP_URL=http://localhost:52099` - URL приложения

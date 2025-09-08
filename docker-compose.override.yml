@@ -1,0 +1,15 @@
+# Docker Compose override для разработки
+# Этот файл автоматически применяется при запуске docker-compose
+version: '3.8'
+
+services:
+  app:
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+    volumes:
+      # Монтируем исходный код для разработки
+      - .:/var/www/html
+      # Исключаем vendor и node_modules из монтирования для производительности
+      - /var/www/html/vendor
+      - /var/www/html/node_modules

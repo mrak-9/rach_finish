@@ -33,10 +33,20 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # Установка зависимостей
-RUN  git config --global --add safe.directory /var/www/html
-RUN composer update
-RUN composer install --no-dev -o
-RUN npm install && npm run build
+RUN git config --global --add safe.directory /var/www/html
+
+# Установка PHP зависимостей
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Установка Node.js зависимостей и сборка фронтенда
+RUN npm ci --only=production
+RUN npm run build
+
+# Генерация ключа приложения и кеширование конфигурации
+RUN php artisan key:generate --no-interaction
+RUN php artisan config:cache
+RUN php artisan route:cache
+RUN php artisan view:cache
 
 # Настройка прав доступа
 RUN chown -R www:www /var/www/html

@@ -1,0 +1,43 @@
+# Docker Compose конфигурация для продакшена
+# Запуск: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+version: '3.8'
+
+services:
+  app:
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+    # Убираем монтирование исходного кода в продакшене
+    volumes:
+      - ./storage/app/events:/var/www/html/storage/app/events
+      - ./storage/logs:/var/www/html/storage/logs
+    restart: unless-stopped
+
+  mariadb:
+    # Дополнительные настройки для продакшена
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-buffer-pool-size=512M
+      --innodb-log-file-size=128M
+      --max-connections=500
+      --query-cache-type=1
+      --query-cache-size=64M
+      --slow-query-log=1
+      --slow-query-log-file=/var/log/mysql/slow.log
+      --long-query-time=2
+
+  # Добавляем Redis для кеширования в продакшене
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - rach-network
+
+volumes:
+  redis_data:
+    driver: local

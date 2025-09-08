@@ -1,0 +1,49 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation
+*.md
+TECHNICAL_REQUIREMENTS.md
+DOCKER_SETUP.md
+MARIADB_SETUP.md
+RATE_LIMITING_REPORT.md
+EVENTS_FILESYSTEM_REPORT.md
+
+# Development files
+.env.example
+phpunit.xml
+tests/
+
+# Node modules (will be installed in container)
+node_modules/
+
+# Logs
+*.log
+storage/logs/*
+server.log
+
+# Cache
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp

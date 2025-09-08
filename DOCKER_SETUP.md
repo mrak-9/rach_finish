@@ -41,8 +41,8 @@ docker-compose exec app php artisan storage:link
 
 ### Доступ к приложению
 
-- **Сайт:** http://localhost:12000
-- **Админ панель:** http://localhost:12000/admin
+- **Сайт:** http://localhost:52099
+- **Админ панель:** http://localhost:52099/admin
 - **phpMyAdmin:** http://localhost:8080
 - **MariaDB:** localhost:3306
 
@@ -50,14 +50,14 @@ docker-compose exec app php artisan storage:link
 
 **MariaDB:**
 - Хост: localhost:3306
-- База данных: rach_website
+- База данных: rach_db
 - Пользователь: rach_user
-- Пароль: rach_password
-- Root пароль: root_password
+- Пароль: rach_password123
+- Root пароль: root_password123
 
 **phpMyAdmin:**
 - Пользователь: root
-- Пароль: root_password
+- Пароль: root_password123
 
 ## Управление контейнерами
 
