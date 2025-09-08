@@ -12,13 +12,13 @@ class ConferenceController extends Controller
     {
         // Получаем текущую конференцию (если есть)
         $currentConference = Conference::where('registration_start_date', '<=', now())
-            ->where('conference_date', '>=', now())
-            ->orderBy('conference_date')
+            ->where('conference_start_date', '>=', now())
+            ->orderBy('registration_start_date')
             ->first();
 
         // Получаем прошедшие конференции, сгруппированные по годам
-        $pastConferences = Conference::where('conference_date', '<', now())
-            ->orderBy('conference_date', 'desc')
+        $pastConferences = Conference::where('conference_start_date', '<', now())
+            ->orderBy('conference_start_date', 'desc')
             ->get()
             ->groupBy(function($conference) {
                 return $conference->conference_date->format('Y');
@@ -30,19 +30,19 @@ class ConferenceController extends Controller
     public function show(Conference $conference)
     {
         $conference->load(['participants', 'theses']);
-        
+
         // Проверяем, может ли пользователь зарегистрироваться
         $canRegister = false;
         $registrationMessage = '';
-        
+
         if (Auth::check()) {
             $user = Auth::user();
-            
+
             // Проверяем, не зарегистрирован ли уже пользователь
             $existingParticipation = $conference->participants()
                 ->where('user_id', $user->id)
                 ->first();
-                
+
             if ($existingParticipation) {
                 $registrationMessage = 'Вы уже зарегистрированы на эту конференцию';
             } elseif ($conference->registration_start_date > now()) {

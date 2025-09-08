@@ -16,8 +16,8 @@ class HomeController extends Controller
             ->get();
 
         $upcomingConferences = Conference::where('registration_start_date', '<=', now())
-            ->where('start_date', '>=', now())
-            ->orderBy('start_date', 'asc')
+            ->where('conference_start_date', '>=', now())
+            ->orderBy('conference_start_date', 'asc')
             ->limit(3)
             ->get();
 

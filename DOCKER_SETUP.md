@@ -102,7 +102,7 @@ git pull origin main
 docker-compose up -d --build
 
 # Обновление зависимостей
-docker-compose exec app composer install --no-dev --optimize-autoloader
+docker-compose exec app composer install --no-dev -o
 docker-compose exec app npm install && npm run build
 
 # Запуск миграций

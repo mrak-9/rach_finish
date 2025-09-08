@@ -6,6 +6,9 @@ RUN apk add --no-cache \
     curl \
     libpng-dev \
     libxml2-dev \
+    libzip-dev \
+    oniguruma-dev \
+    icu-dev \
     zip \
     unzip \
     nodejs \
@@ -14,7 +17,8 @@ RUN apk add --no-cache \
     supervisor
 
 # Установка PHP расширений
-RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-configure intl
+RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd intl zip
 
 # Установка Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -26,16 +30,19 @@ RUN addgroup -g 1000 www && adduser -u 1000 -G www -s /bin/sh -D www
 WORKDIR /var/www/html
 
 # Копирование файлов приложения
-COPY --chown=www:www . /var/www/html
+COPY . /var/www/html
 
 # Установка зависимостей
-RUN composer install --no-dev --optimize-autoloader
+RUN  git config --global --add safe.directory /var/www/html
+RUN composer update
+RUN composer install --no-dev -o
 RUN npm install && npm run build
 
 # Настройка прав доступа
 RUN chown -R www:www /var/www/html
 RUN chmod -R 755 /var/www/html/storage
 RUN chmod -R 755 /var/www/html/bootstrap/cache
+RUN chown -R www:www /var/lib/nginx/
 
 # Копирование конфигурации Nginx
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
