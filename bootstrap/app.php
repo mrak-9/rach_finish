@@ -15,9 +15,6 @@ return Application::configure(basePath: dirname(__DIR__))
         // Настройка rate limiting для различных групп маршрутов
         $middleware->throttleApi();
         
-        // Кастомные rate limiters
-        $middleware->throttleWithRedis();
-        
         // DDoS защита для всех маршрутов
         $middleware->append(\App\Http\Middleware\DDoSProtection::class);
         
